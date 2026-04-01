@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Dashboard</title>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 40px;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 600px;
+        margin: auto;
+      }
+      .user-card {
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+      }
+      .error {
+        color: red;
+        font-weight: bolder;
+      }
+      button {
+        padding: 10px;
+        cursor: pointer;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h3>User Directory</h3>
+      <button onclick="fetchUsers()">Refresh User List</button>
+      <p id="status-message"></p>
+      <div id="user-list"></div>
+    </div>
+    <script>
+      const headers = {
+        "Content-Type": "application/json",
+        "x-api-key": "4876yi8576563457j4",
+      };
+      const API_URL = "http://localhost:3000/node/users";
+      async function fetchUsers() {
+        const listDiv = document.getElementById("user-list");
+        const status = document.getElementById("status-message");
+        listDiv.innerHTML = "Loading...";
+
+        try {
+          const response = await fetch(API_URL);
+          // check if the server return an error code
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Server Error");
+          }
+          const json = await response.json();
+          const users = json.data;
+          // clear the loading text
+          listDiv.innerHTML = "";
+          users.forEach((user) => {
+            listDiv.innerHTML += `
+                    <div class="user-card">
+                        <strong>${user.name}</strong><br />
+                        <span>${user.email}</span>
+                        <button onclick="deleteUser(${user.id})" style="background:red;margin-left:10px;">Delete</button>
+                        </div>`;
+          });
+          status.innerText = `Data loaded from: ${json.source}`;
+        } catch (err) {
+          status.innerHTML = `<span class="error">Error: ${err.message}</span>`;
+          listDiv.innerHTML = "";
+        }
+      }
+      async function deleteUser(id) {
+        if (!confirm("Are you sure?")) return;
+        const deleteUrl = API_URL.includes("php")
+          ? `${API_URL}?id=${id}`
+          : `${API_URL}/${id}`;
+        try {
+          const response = await fetch(deleteUrl, {
+            method: "DELETE",
+            headers: headers,
+          });
+          const result = await response.json();
+          if (response.ok) {
+            alert(result.message);
+            // refresh Users List
+            fetchUsers();
+          } else {
+            alert(result.error);
+          }
+        } catch (err) {
+          console.error("delete error: ", err);
+        }
+      }
+      // inital load
+      fetchUsers();
+    </script>
+  </body>
+</html>
