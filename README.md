@@ -15,9 +15,9 @@
 
 ## Routes
 
-- `GET /node/users` Get all users
-- `POST /node/users` Add a user
-- `DELETE /node/users/id` Remove a user by id
+- GET [/node/users](http://localhost:3000/node/users) Get all users
+- POST [/node/users](http://localhost:3000/node/users) Add a user
+- DELETE [/node/users/id](http://localhost:3000/node/users/1) Remove a user by id
 
 ## API Key
 
